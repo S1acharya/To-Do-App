@@ -2,7 +2,6 @@ import React from 'react';
 import { ListItem, ListItemText,Button  } from '@material-ui/core';
 import { db } from "./firebase_config";
 
-
 export default function TodoListItem({todo , inprogress , id}) {
     // this function just toggles from inprogress to progress and vice-versa
     function toggleInProgress() {
