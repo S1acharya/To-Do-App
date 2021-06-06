@@ -1,10 +1,10 @@
 import './App.css';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { useState } from 'react';
-// import Button from '@material-ui/core/Button';
+import { useEffect, useState } from 'react';
 import {db} from "./firebase_config";
 import firebase from "firebase";
+import TodoListItem from "./Todo";
 
 function App() {
 
@@ -15,6 +15,7 @@ function App() {
   // this state can't be updated without this function
   // initialState is actually th initial value for texField
   // const [state, setState] = useState(initialState);
+  const [todos , setTodos] = useState([]);
   const [todoInput , setTodoInput] = useState(" ");
 
   // add todo to database
@@ -31,17 +32,37 @@ function App() {
     })
 // next line is so that after we add a new todo to database , we get an empty textfield to type again
     setTodoInput("");
-
   };
 
   // we can also write above function this way
   // const addtodo = () => {
   // }
 
+
+  // render data from firebase to screen
+  // useEffect feature is used to render data on screen the moment we visit the page
+  useEffect(() => {
+    getTodos();
+  }, [])  //blank to run only on first launch
+
+  function getTodos() {
+    db
+    .collection("todos")
+    .onSnapshot(function (querySnapshot) {
+      setTodos(
+        querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          todo: doc.data().todo,
+          inprogress: doc.data().inprogress,
+        }))
+      );
+    });
+  }
+
   return (
     <div className="App" style={styles.textField}>
       <Button variant="contained" color="primary">
-        <h1>Let's start the show Babes !</h1>
+        <h1>Let's start the show Babes 🔥</h1>
       </Button>
       <p></p>
       <div>
@@ -55,10 +76,22 @@ function App() {
                 // console.log('this is the todo input' , e.target.value);
                 // console.log(`this is the todo input ${e.target.value}`);  // another way of writing console using backtick
               }}
-              style={{maxWidth: "300px" , width : "90vw"}}
+              style={{maxWidth: "500px" , width : "90vw"}}
             />
             <Button type = "submit" variant="contained" onClick = {addtodo} style={styles.button}>Okay!</Button>
           </form>
+
+          {/* fetch the data and show on screen */}
+          <div style={{ width: "90vw", maxWidth: "500px", marginTop: "24px" }}>
+            {todos.map((todo) => (
+              <TodoListItem
+                todo={todo.todo}
+                inprogress={todo.inprogress}
+                id={todo.id}
+              />
+            ))}
+        </div>
+
       </div>
     </div>
   );
@@ -74,6 +107,7 @@ const styles = {
     flexDirection : "column",
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
   },
   // button: {
   //   display: "none",
